@@ -4,69 +4,42 @@
 Definicion de clase Corpus, para consulta y 
 uso de la base de datos .xml.
 """
-
-from xml.dom import minidom
+from lxml import etree
 from datetime import date
+from nltk.tokenize import word_tokenize
 
 class Note(object):
 
     def __init__(self, note):
 
-        self.idNote = int(note.getAttribute('id'))
+        self.idNote = int(note.get('id'))
 
-        self.title = note.getElementsByTagName('title')[0].firstChild.data
-        self.subtitle = note.getElementsByTagName('subtitle')[0].firstChild.data
-        self.corpus = note.getElementsByTagName('corpus')[0].firstChild.data
-        self.section = note.getElementsByTagName('section')[0].firstChild.data
+        self.title = note.find('title').text
+        self.section = note.find('section').text
+        self.subtitle = note.find('subtitle').text
+        self.body = note.find('body').text
 
-        self.day = int(note.getElementsByTagName('day')[0].firstChild.data)
-        self.month = int(note.getElementsByTagName('month')[0].firstChild.data)
-        self.year = int(note.getElementsByTagName('year')[0].firstChild.data)
+        self.day = int(note.find('date/day').text)
+        self.month = int(note.find('date/month').text)
+        self.year = int(note.find('date/year').text)
 
         self.date = date(self.year, self.month, self.day)
-         
+
+    def number_of_body_words(self):
+
+        tokens = word_tokenize(self.body)
+        return len(tokens)
 
 class Corpus(object):
 
     def __init__(self, document):
-        self.db = minidom.parse(document)
+
+        xmldoc = etree.parse(document)
+        root = xmldoc.getroot()
+
+        self.newspaper_name = root.find('name').text
+        self.description = root.find('description').text
         self.notes = []
-        notes = self.db.getElementsByTagName('note')
-        for note in notes:
+        for note in root.findall('note'):
             self.notes.append(Note(note))
 
-
-    def getNoteById(self, idNote):
-
-        for note in self.notes:
-            if idNote == note.idNote:
-                return note
-
-
-        
-"""
-word = 'Macri'
-
-doc = minidom.parse('LaNacion.xml')
-
-notes = doc.getElementsByTagName('note')
-
-data = {}
-dates = []
-
-for note in notes:
-
-    month = int(note.getElementsByTagName('month')[0].firstChild.data)
-    day = int(note.getElementsByTagName('day')[0].firstChild.data)
-
-    title = note.getElementsByTagName('title')[0].firstChild.data
-    corpus = note.getElementsByTagName('corpus')[0].firstChild.data
-    if word in title or word in corpus:
-        words = word_tokenize(title) + word_tokenize(corpus)
-        try:
-            data[str(current_date)] += words.count(word)
-        except:
-            data[str(current_date)] = words.count(word)
-
-print data 
-"""
