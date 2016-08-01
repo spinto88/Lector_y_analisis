@@ -60,12 +60,12 @@ class Note(object):
                      phrase_upper, phrase_capitalize]
 
         for phrase2check in phrases2check:
-            if phrase in self.title \
-            or phrase in self.subtitle \
-            or phrase in self.body:
+            if phrase2check in self.title \
+            or phrase2check in self.subtitle \
+            or phrase2check in self.body:
                 return True
-            else:
-                return False
+
+        return False
         
     def numberOfBodyWords(self):
 
