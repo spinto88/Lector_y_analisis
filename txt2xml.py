@@ -56,6 +56,9 @@ while current_day <= date_final:
       fp.write('\t\t\t<day>' + str(current_day.day) + '</day>\n')
       fp.write('\t\t\t<month>' + str(current_day.month) + '</month>\n')
       fp.write('\t\t\t<year>' + str(current_day.year) + '</year>\n')
+      fp.write('\t\t\t<day_of_the_week>' + \
+      str(calendar.weekday(current_day.year, current_day.month, current_day.day)) + \
+      '</day_of_the_week>\n')
       fp.write('\t\t</date>\n')
 
       fp.write('\t\t<subtitle>' + subtitle + '</subtitle>\n')

@@ -8,4 +8,4 @@ for note in lanacion.notes:
 
     if note.phraseInNote(palabra):
 
-        print note.title, note.date
+        print note.idNote, note.title, note.date
