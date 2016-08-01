@@ -9,6 +9,8 @@ from datetime import date
 from datetime import timedelta
 from nltk.tokenize import word_tokenize
 
+week_days = ['Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab', 'Dom']
+
 class Note(object):
 
     def __init__(self, note):
@@ -16,15 +18,27 @@ class Note(object):
         self.idNote = int(note.get('id'))
 
         self.title = note.find('title').text
+        if self.title == None or self.title == '[]':
+            self.title = ''
+
         self.section = note.find('section').text
+        if self.section == None or self.section == '[]':
+            self.section = ''
+
         self.subtitle = note.find('subtitle').text
+        if self.subtitle == None or self.subtitle == '[]':
+            self.subtitle = ''
+
         self.body = note.find('body').text
+        if self.body == None or self.body == '[]':
+            self.body = ''
 
         self.day = int(note.find('date/day').text)
         self.month = int(note.find('date/month').text)
         self.year = int(note.find('date/year').text)
 
         self.date = date(self.year, self.month, self.day)
+        self.day_of_the_week = week_days[int(note.find('date/day_of_the_week').text)]
 
     def __eq__(self, other):
 
@@ -53,11 +67,11 @@ class Note(object):
             else:
                 return False
         
-
     def numberOfBodyWords(self):
 
         tokens = word_tokenize(self.body)
         return len(tokens)
+
 
 class Corpus(object):
 
@@ -74,7 +88,6 @@ class Corpus(object):
 
         self.deleteRepeatedNotes()
         
-
     def deleteRepeatedNotes(self):
 
         notes2remove = []
@@ -85,15 +98,19 @@ class Corpus(object):
                 and note2compare.idNote != note.idNote:
                     notes2remove.append(note2compare.idNote)
 
+        notes_removed = 0
         for idNote in notes2remove:
             for note in self.notes:
                 if note.idNote == idNote:
                     self.notes.remove(note)
-        
+                    notes_removed += 1
+                    break
+
+        return notes_removed
 
     def getNoteById(self, idNote):
 
         for note in self.notes:
             if note.idNote == idNote:
                 return note       
-        return 'id not found'
+        return 'id not found'        

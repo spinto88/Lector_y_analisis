@@ -4,27 +4,35 @@
 import os
 from datetime import date
 from datetime import timedelta
+import calendar
 
 path = os.getcwd()
 
 date_inicial = date(2016, 06, 15)
-date_final = date(2016, 07, 28)
+date_final = date.today()
 day1 = timedelta(days = 1)
 
 current_day = date_inicial
 
 id_note = 0
 
+fname = 'LaNacion.xml'
+
+try:
+    os.remove(fname)
+except:
+    pass
+
+fp = open(fname, 'a')
+fp.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+fp.write('<newspaper>\n') 
+fp.write('\t<name>La Nacion</name>\n')
+fp.write('\t<description>Notas del diario La Nacion del dia' + str(date_inicial) + ' al ' + str(date_final) + '.</description>\n')
+fp.close()
+
 while current_day <= date_final:
    
   path_new = path + '/Notas' + str(current_day)
-
-  fp = open('LaNacion.xml', 'a')
-  fp.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-  fp.write('<newspaper>\n') 
-  fp.write('\t<name>La Nacion</name>\n')
-  fp.write('\t<description>Notas del diario La Nacion del dia' + str(date_inicial) + ' al ' + str(date_final) + '.</description>\n')
-  fp.close()
 
   for i in range(500):
 
@@ -47,7 +55,7 @@ while current_day <= date_final:
       body = body.replace('&', '&amp;')
 
       os.chdir(path)
-      fp = open('LaNacion.xml', 'a')
+      fp = open(fname, 'a')
       fp.write('\t<note id="' + str(id_note) +'">\n')
       fp.write('\t\t<title>' + title + '</title>\n')
       fp.write('\t\t<section>' + section + '</section>\n')
@@ -70,7 +78,9 @@ while current_day <= date_final:
   current_day += day1
 
 os.chdir(path)
-fp = open('LaNacion.xml', 'a')
+fp = open(fname, 'a')
 fp.write('</newspaper>\n') 
 fp.close()
 
+from shutil import copyfile
+copyfile(fname, '/home/spinto/Escritorio/Lector_y_analisis/' + fname)
