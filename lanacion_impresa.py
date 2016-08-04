@@ -11,6 +11,7 @@ from urllib2 import urlopen
 from bs4 import BeautifulSoup as BS
 import codecs
 import datetime as dt
+import json
 import os
 
 # Directorio donde se guarda.
@@ -23,38 +24,21 @@ except:
     pass
 os.chdir(directory)
 
-# Secciones a tener en cuenta.
-secciones = ['Politica', 'Economia', 'Deportes', 'Sociedad', 'Seguridad', 'Buenos Aires', 'Opinion', 'Espectaculos', 'El Mundo']
-id_secciones = ['30', '272', '131', '7773', '7775', '7774', '28', '120', '7']
-
 id_nota = 0
-"""
+
 # Guardado del titulo e id para rápida identificación.
 fp = codecs.open('Resumen' + str(today) + '.txt', 'a', 'utf8')
 fp.write('#Id_nota, Titulo, Seccion' + '\n')
 fp.close()
-"""
-for seccion in secciones:
+
+if True:
 
     # LLamado al RSS.
-    pagina = 'http://contenidos.lanacion.com.ar/herramientas/rss-categoria_id=' + id_secciones[secciones.index(seccion)]
+    pagina = 'http://contenidos.lanacion.com.ar/herramientas/rss-origen=1'
     feed = feedparser.parse(pagina)
-    
-    pagina_titulos = 'http://contenidos.lanacion.com.ar/herramientas/rss-origen=1'
-    fp = codecs.open('Titulos.txt', 'a', 'utf8')
-    feed_titulos = feedparser.parse(pagina_titulos)
-    for items in feed_titulos['items']:
-        fp.write(items['title'] + '\n')
-    fp.close()
-    #print len(feed_titulos['items'])
-#    break
-    """
 
     # Recorrido sobre las notas de la sección.
-    for i in range(len(feed['items'])):
-
-        # Nota como RSS.
-        nota = feed['items'][i]
+    for nota in feed['items']:
 
         # Título, subtitulo, fecha.
         title = nota['title']
@@ -63,7 +47,7 @@ for seccion in secciones:
         date = date.split('-') 
         date = dt.date(int(date[0]), int(date[1]), int(date[2]))
         
-        if date == today and time == '00:00:00-03:00':
+        if True:
 
             # Link de la nota.
             link = nota['link']
@@ -88,17 +72,34 @@ for seccion in secciones:
                     content += tag.getText()
                 except: 
                     pass
+
+            # Para la sección
+            try:
+                json_string = json.loads(data_section)
+                section = json_string['articleSection']
+            except:
+                data_section = ''
+                data_section_aux = soup.findAll('script')
+                for data in data_section_aux:
+                    data_section += data.getText()
+                data_section = data_section.split(';')
+                for text in data_section:
+                    if 'LN.NotaDM.section' in text:
+                        text = text.split('=')
+                        text[1] = text[1].replace('"','')
+                        text[1] = text[1].replace(' ','')
+                        section = text[1]
+                        break
             
             # Guardado de la nota en formato: fecha, sección, título, subtítulo, contenido.
+                       
             fp = codecs.open('Nota' + str(id_nota) + '.txt', 'w', 'utf8')
-            fp.write(str(date) + '\n' + seccion + '\n' + title + '\n' + description + '\n' + content + '\n')
+            fp.write(str(date) + '\n' + section + '\n' + title + '\n' + description + '\n' + content + '\n')
             fp.close()
 
             # Guardado del titulo e id para rápida identificación.
             fp = codecs.open('Resumen' + str(today) + '.txt', 'a', 'utf8')
-            fp.write(str(id_nota) + '\t' + title + '\t' + seccion + '\n')
+            fp.write(str(id_nota) + '\t' + title + '\t' + section + '\n')
             fp.close()
 
-            id_nota += 1
-
-    """
+            id_nota += 1 
