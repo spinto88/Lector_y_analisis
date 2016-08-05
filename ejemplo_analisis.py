@@ -1,9 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from corpus import Corpus
+import datetime as dt
 
-newspaper = Corpus('Infobae.xml')
+newspaper = Corpus('LaNacion.xml')
 
-palabra = 'macri'
+palabra = u'brexit'
 
 for note in newspaper.notes:
     if note.phraseInNote(palabra):
-        print note.idNote, note.title, note.day_of_the_week, note.date
+        print note.idNote, note.title, note.date

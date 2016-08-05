@@ -55,9 +55,11 @@ class Note(object):
         phrase_lower = phrase.lower()
         phrase_upper = phrase.upper()
         phrase_capitalize = phrase.capitalize()
+        phrase_title = phrase.title()
 
         phrases2check = [phrase, phrase_lower, \
-                     phrase_upper, phrase_capitalize]
+                     phrase_upper, phrase_capitalize, \
+                     phrase_title]
 
         for phrase2check in phrases2check:
             if phrase2check in self.title \
