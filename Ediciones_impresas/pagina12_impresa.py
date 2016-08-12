@@ -16,7 +16,7 @@ import os
 today = dt.date.today()
 today = str(today)
 
-directory = os.getcwd() + '/Pagina12_impresa_prueba_' + today
+directory = os.getcwd() + '/Pagina12_impresa_' + today
 try:
     os.remove(directory)
 except:
