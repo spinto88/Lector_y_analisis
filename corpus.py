@@ -8,9 +8,30 @@ from lxml import etree
 from datetime import date
 from datetime import timedelta
 from nltk.tokenize import word_tokenize
+import matplotlib.pyplot as plt
+import numpy as np
 
 week_days = ['Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab', 'Dom']
 
+# Auxiliar functions and things 
+from nltk.corpus import swadesh
+from nltk.corpus import stopwords
+common_words = swadesh.words('es') + stopwords.words('spanish')
+
+def phrase_variation(phrase):
+
+    phrase_lower = phrase.lower()
+    phrase_upper = phrase.upper()
+    phrase_capitalize = phrase.capitalize()
+    phrase_title = phrase.title()
+
+    phrases2check = [phrase, phrase_lower, \
+                 phrase_upper, phrase_capitalize, \
+                 phrase_title]
+
+    return phrases2check
+
+# Class Note 
 class Note(object):
 
     def __init__(self, note):
@@ -52,14 +73,7 @@ class Note(object):
 
     def phraseInNote(self, phrase):
 
-        phrase_lower = phrase.lower()
-        phrase_upper = phrase.upper()
-        phrase_capitalize = phrase.capitalize()
-        phrase_title = phrase.title()
-
-        phrases2check = [phrase, phrase_lower, \
-                     phrase_upper, phrase_capitalize, \
-                     phrase_title]
+        phrases2check = phrase_variation(phrase)
 
         for phrase2check in phrases2check:
             if phrase2check in self.title \
@@ -74,7 +88,46 @@ class Note(object):
         tokens = word_tokenize(self.body)
         return len(tokens)
 
+    def principal_words(self):
 
+        title_tokenized = word_tokenize(self.title)
+        subtitle_tokenized = word_tokenize(self.subtitle)
+        body_tokenized = word_tokenize(self.body)
+
+        # Remove common words
+        for word in common_words:
+
+            for word_variation in phrase_variation(word):
+
+                while word_variation in title_tokenized:
+                    title_tokenized.remove(word_variation)
+
+                while word_variation in subtitle_tokenized:
+                    subtitle_tokenized.remove(word_variation)                
+
+                while word_variation in body_tokenized:
+                    body_tokenized.remove(word_variation)
+
+        # Remove punctuation symbols
+        for word in title_tokenized:
+            if len(word) == 1:
+                title_tokenized.remove(word)
+        for word in subtitle_tokenized:
+            if len(word) == 1:
+                subtitle_tokenized.remove(word)
+        for word in body_tokenized:
+            if len(word) == 1:
+                body_tokenized.remove(word)
+
+        ans = {}
+        ans['title'] = ', '.join(list(set(title_tokenized)))
+        ans['subtitle'] = ', '.join(list(set(subtitle_tokenized)))
+        ans['body'] = ', '.join(list(set(body_tokenized)))
+
+        return ans
+
+
+# Corpus
 class Corpus(object):
 
     def __init__(self, document):
@@ -82,8 +135,22 @@ class Corpus(object):
         xmldoc = etree.parse(document)
         root = xmldoc.getroot()
 
+        self.xmldoc = xmldoc
         self.newspaper_name = root.find('name').text
         self.description = root.find('description').text
+
+        initial_date_day = int(root.find('initial_date/day').text)
+        initial_date_month = int(root.find('initial_date/month').text)
+        initial_date_year = int(root.find('initial_date/year').text)
+        self.initial_date = date(initial_date_year, initial_date_month, \
+                            initial_date_day)
+        
+        final_date_day = int(root.find('final_date/day').text)
+        final_date_month = int(root.find('final_date/month').text)
+        final_date_year = int(root.find('final_date/year').text)
+        self.final_date = date(final_date_year, final_date_month, \
+                            final_date_day)
+
         self.notes = []
         for note in root.findall('note'):
             self.notes.append(Note(note))
@@ -116,3 +183,24 @@ class Corpus(object):
             if note.idNote == idNote:
                 return note       
         return 'id not found'        
+
+    def evolOfSectionPlot(self, section):
+
+        days = []
+
+        current_date = self.initial_date
+        while current_date <= self.final_date:
+            days.append(current_date)
+            current_date += timedelta(days = 1)
+        
+        notes = np.zeros(len(days))
+        for note in self.notes:
+            if note.section == section:
+                ind_date = days.index(note.date)
+                notes[ind_date] += 1
+
+        plt.plot(range(len(days)), notes, '.-', markersize = 10)
+        plt.xticks(range(len(days)), days, rotation = 'vertical')
+        plt.grid('on')
+        plt.show()
+
