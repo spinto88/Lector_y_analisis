@@ -78,8 +78,13 @@ for supl in suplementos.keys():
         if note_date == dt.date.today():
             # Extracción de contenido            
             link = item['link']
-            req = Request(link, headers = {'User-Agent': 'Mozilla/5.0'})
-            html = urlopen(req).read()
+            try:
+                req = Request(link, headers = {'User-Agent': 'Mozilla/5.0'})
+                html = urlopen(req).read()
+            except:
+                id_nota += 1         
+                continue
+
             soup = BS(html, 'html.parser')
             
             # Subtítulo

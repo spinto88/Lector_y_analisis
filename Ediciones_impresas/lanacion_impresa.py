@@ -56,7 +56,12 @@ if True:
             link = nota['link']
 
 	    # Lectura de la nota como html y extracción del contenido.
-            html = urlopen(link).read() 
+            try:
+                html = urlopen(link).read() 
+            except:
+                id_nota += 1 
+                continue
+
             soup = BS(html, 'html.parser')
 
             # Subtitulo y cuerpo
