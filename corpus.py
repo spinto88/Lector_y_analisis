@@ -10,6 +10,7 @@ from datetime import timedelta
 from nltk.tokenize import word_tokenize
 import matplotlib.pyplot as plt
 import numpy as np
+import codecs
 
 week_days = ['Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab', 'Dom']
 
@@ -125,6 +126,15 @@ class Note(object):
         ans['body'] = ', '.join(list(set(body_tokenized)))
 
         return ans
+
+    def print2file(self, fname):
+
+        fp = codecs.open(fname,'a','utf8')
+        fp.write(self.title + '\n')
+        fp.write(self.section + '\n')
+        fp.write(self.subtitle + '\n')
+        fp.write(self.body + '\n')
+        fp.close()
 
 
 # Corpus
